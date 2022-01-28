@@ -1,0 +1,308 @@
+int playerYPos;
+int playerXPos;
+int AIYPos;
+int AIXPos;
+int batSpeed = 3;
+int ballSize = 20;
+int ballXPos;
+int ballYPos;
+int ballAngle;
+int ballXSpeed;
+float ballYSpeed;
+int batX = 20;
+int batY = 200;
+int AIPoints;
+int playerPoints;
+
+boolean gameOver;
+boolean gameStart;
+boolean mainMenu = true;
+
+void setup()
+{
+  size(1200,800);
+  gameOver = false;
+  gameStart = false;
+  
+  //sets all the instances' start locations and balls speed
+  playerYPos = height / 2;
+  playerXPos = 100;
+  playerPoints = 0;
+  AIYPos = height / 2;
+  AIXPos = 1100;
+  AIPoints = 0;
+  ballXPos = width / 2;
+  ballYPos = height / 2;
+  ballXSpeed = 5; //ONLY NUMBERS THAT ARE ABLE TO DIVIDE THE BATS Y POS ON BOTH BATS INTO A WHOLE NUMBER CAN WORK
+  ballYSpeed = 0;
+}
+
+void draw()
+{
+  background(0);
+  
+  //holds the games 4 states
+  //plays the game
+  if(gameOver == false && gameStart == true)
+  {
+    noCursor();
+    PlayerObject();
+    AIObject();
+    BallObject();
+    GameEnviroment();
+  }
+  
+  //runs if one side loses
+  if(gameOver == true)
+  {
+    GameOver();
+  }
+  
+  //loads the main menu
+  if(mainMenu == true)
+  {
+    MainMenu();
+  }
+}
+
+//Holds the code for the players instance
+void PlayerObject()
+{
+  //lets the player move their instance
+  if(keyPressed)
+  {
+    if(key == 'w' || key == 'W')
+    {
+      playerYPos = playerYPos - 5;
+    }
+    if(key == 's' || key == 'S')
+    {
+      playerYPos = playerYPos + 5;
+    }
+  }
+  
+  //stops the instance from leaving the play area
+  if(playerYPos <= 200)
+  {
+    playerYPos = 200;
+  }
+  else if(playerYPos >= height - 100)
+  {
+    playerYPos = height - 100;
+  }
+  
+  //players instance
+  rectMode(CENTER);
+  fill(255);
+  rect(playerXPos, playerYPos, batX, batY);
+}
+
+//Holds the code for the AI instance
+void AIObject()
+{
+  //Controls the A.Is' behaviur
+  if(AIYPos > ballYPos)
+  {
+    AIYPos -= batSpeed;
+  }
+  if(AIYPos < ballYPos)
+  {
+    AIYPos += batSpeed;
+  }
+  
+  //stops the instance from leaving the play area
+  if(AIYPos <= 200)
+  {
+    AIYPos = 200;
+  }
+  else if(AIYPos >= height - 100)
+  {
+    AIYPos = height - 100;
+  }
+  
+  //creates the AIs' instance
+  rectMode(CENTER);
+  fill(255);
+  rect(AIXPos, AIYPos, batX, batY);
+}
+  
+//Holds the code for the ball instance
+void BallObject()
+{
+  //detects if it is colliding with the player bat
+  //if I keep moving in my current x direction, will I collide with the player bat?
+  if (ballXPos - ballSize/2 == playerXPos + batX/2 && ballYPos > playerYPos -batY/2 && ballYPos < playerYPos + batY/2)
+  {
+    ballXSpeed *= -1;
+    ballYSpeed = random(-6, 5);
+    playerPoints += 1;
+  }
+  //------------------------------------------------------------------------------------------------------
+  //detects if it is colliding with the A.I bat
+  //if I keep moving in my current X direction, will I collide with the A.I bat?
+  if (ballXPos - ballSize/2 == AIXPos - batX && ballYPos > AIYPos - batY/2 && ballYPos < AIYPos + batY/2)
+  {
+    ballXSpeed *= -1;
+    ballYSpeed = random(-6, 5);
+    AIPoints += 1;
+  }
+
+  //bounce off top and bottom edges of screen
+  else if(ballYPos <= 100 + ballSize || ballYPos + ballSize > height)
+  {
+    ballYSpeed *= -1;
+  }
+  
+  ballXPos -= ballXSpeed;
+  ballYPos -= ballYSpeed;
+  
+  //ends the game if the ball goes off the screen
+  if(ballXPos >= width || ballXPos <= 0)
+  {
+    gameOver = true;
+  }
+  
+  //ball instance
+  push();
+  fill(255);
+  rectMode(CENTER);
+  rect(ballXPos, ballYPos, ballSize, ballSize);
+  pop();
+}
+
+//the games enviroment and manager
+void GameEnviroment()
+{
+  textSize(30);
+  text(playerPoints, playerXPos, 50);
+  text(AIPoints, AIXPos, 50);
+  
+  stroke(255);
+  line(0, 100, width, 100);
+  
+  for(int i = 0; i <= 20; i++)
+  {
+    rect(width / 2, i * 100, 5, 50);
+  }
+}
+
+//holds all the parts of the main menu
+void MainMenu()
+{  
+  rectMode(CORNER);
+  noStroke();
+  
+  textAlign(CENTER);
+  textSize(90);
+  text("Game", width / 2, 300);
+  textSize(30);
+  text("The game", width / 2, 350);
+  
+  //the button for if the player wants to play the game
+  if(mouseX >= 300 && mouseX <= 500 && mouseY >= 600 && mouseY <= 700)
+  {
+    fill(175);
+    rect(300, 600, 200, 100);
+    
+    textAlign(CENTER);
+    textSize(30);
+    fill(255);
+    text("Start game", 400, 660);
+    
+    if(mousePressed && gameStart != true)
+    {
+      gameStart = true;
+      mainMenu = false;
+    }
+  }
+  else
+  {
+    fill(125);
+    rect(300, 600, 200, 100);
+    
+    textAlign(CENTER);
+    textSize(30);
+    fill(255);
+    text("Start game", 400, 660);
+  }
+  
+  //the button for if the player wants to quit the game
+  if(mouseX >= 700 && mouseX <= 900 && mouseY >= 600 && mouseY <= 700)
+  {
+    fill(175);
+    rect(700, 600, 200, 100);
+    
+    textAlign(CENTER);
+    textSize(30);
+    fill(255);
+    text("Exit game", 800, 660);
+    
+    if(mousePressed && mainMenu == true)
+    {
+      exit();
+    }
+  }
+  else
+  {
+    fill(125);
+    rect(700, 600, 200, 100);
+    
+    textAlign(CENTER);
+    textSize(30);
+    fill(255);
+    text("Exit game", 800, 660);
+  }
+}
+
+void GameOver()
+{
+  rectMode(CORNER);
+  cursor();
+  
+  //the button for if the player wants to play the game
+  if(mouseX >= 300 && mouseX <= 500 && mouseY >= 600 && mouseY <= 700)
+  {
+    fill(175);
+    rect(300, 600, 200, 100);
+    
+    textAlign(CENTER);
+    textSize(30);
+    fill(255);
+    text("Restart game", 400, 660);
+    
+    if(mousePressed && gameStart != true)
+    {
+      gameStart = true;
+      gameOver = false;
+    }
+  }
+  
+  else
+  {
+    fill(125);
+    rect(300, 600, 200, 100);
+    
+    textAlign(CENTER);
+    textSize(30);
+    fill(255);
+    text("Restart game", 400, 660);
+  }
+  
+  //resets game
+  if(gameOver == true && mousePressed)
+  {
+    setup();
+    gameStart = true;
+  }
+    
+  if(keyPressed)
+  {
+    if(key == ' ')
+    {
+      mainMenu = true;
+      gameOver = false;
+      gameStart = false;
+      cursor();
+    }   
+  }
+}
